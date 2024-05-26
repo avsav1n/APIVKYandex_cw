@@ -126,7 +126,7 @@ class ProfileYandex:
         params = {
             'oauth_token': self.token,
             'format': 'json'
-            }
+        }
         response = requests.get(url, params=params)
         return response.json()['id'], response.json()['last_name'], response.json()['first_name']
 
@@ -224,7 +224,7 @@ class ProfileGoogle:
 
     def _get_profile_info(self) -> str:
         '''
-        Функция-костыль, запрашивающая информацию профиля, создаваемого объекта класса GoogleYandex
+        Функция-костыль, запрашивающая информацию профиля, создаваемого объекта класса ProfileGoogle
         '''
         file = self.drive.CreateFile()
         file.Upload()
@@ -275,7 +275,7 @@ class ProfileGoogle:
         pbar = tqdm.tqdm(backup_files, ncols=100)
         metadata = {
             'parents': [{'id': folder_id}]
-            }
+        }
         try: mkdir('cache')
         except: pass
         for file in pbar:
