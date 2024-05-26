@@ -15,7 +15,7 @@ class SoсialMedia:
     '''
     Класс-предок для классов, работающих с API социальных сетей  
     '''
-    def backup_preparation(self, files='photos') -> dict:
+    def backup_preparation(self, files='photos') -> list:
         '''
         Функция подготовки резервного копирования файлов из социальных сетей
         В качестве аргумента принимает объект класса требуемой сети и тип файлов для копирования
@@ -25,7 +25,8 @@ class SoсialMedia:
                 case 'photos': 
                     return self.get_photos()
                 case _: 
-                    logging.warning('В настоящее время объекту ProfileVK доступно только резервное копирование фотографий')
+                    logging.warning(f'В настоящее время объекту ProfileVK '
+                                    f'доступно только резервное копирование фотографий')
 
 class ProfileVK(SoсialMedia):
     '''
@@ -63,7 +64,8 @@ class ProfileVK(SoсialMedia):
     def get_photos(self, album='profile') -> list:
         '''
         Метод получения фотографий наибольшего размера из профиля VK
-        Результатом возвращает список словарей формата {'name': имя фотографии, 'size': размер фотографии, 'url': ссылка на фотографию}
+        Результатом возвращает список словарей формата 
+        {'name': имя фотографии, 'size': размер фотографии, 'url': ссылка на фотографию}
         '''
         logging.info('Запуск процедуры подготовки файлов')
         url = 'https://api.vk.com/method/photos.get'
@@ -89,7 +91,11 @@ class ProfileVK(SoсialMedia):
                     photo_name = f'{photo['likes']['count']}, {date}, id{photo['id']}.jpg'
                 else: 
                     photo_name = f'{photo['likes']['count']}.jpg'
-                photo_info = {'name': photo_name, 'size': max_sized_photo['type'], 'url': max_sized_photo['url']}
+                photo_info = {
+                    'name': photo_name, 
+                    'size': max_sized_photo['type'], 
+                    'url': max_sized_photo['url']
+                }
                 downloaded_photos.append(photo_info)
                 pbar.set_description(f"Подготовка файла '{photo_info['name']}'")
                 sleep(0.3)
@@ -168,6 +174,9 @@ class ProfileYandex:
         logging.info(f'Инициализация процедуры резервного копирования файлов {files} ' 
                      f'на Yandex Диск id{self.id} из {type(object).__name__} id{object.id}')
         backup_files = object.backup_preparation(files)
+        if not isinstance(backup_files, list):
+            logging.info(f'Журнал исполнения доступен по ссылке \\progress\\progress_log.log')
+            return
         uploaded_files = []
         url = 'https://cloud-api.yandex.net/v1/disk/resources/upload/'
         folder_name = self.create_folder(object)
@@ -189,7 +198,8 @@ class ProfileYandex:
                 uploaded_files.append(file)
                 pbar.set_description(f"Копирование файла '{file['name']}'")
             else:
-                logging.warning(f'Процедура копирования файла {file['name']} прервана, ошибка {response.status_code}')
+                logging.warning(f'Процедура копирования файла {file['name']} прервана, '
+                                f'ошибка {response.status_code}')
                 return
         with open(r'progress\backupYandex.json', 'w', encoding='utf-8') as fw:
             json.dump(uploaded_files, fw, ensure_ascii=False, indent=2)
@@ -256,6 +266,9 @@ class ProfileGoogle:
         logging.info(f'Инициализация процедуры резервного копирования файлов {files} ' 
                      f'на Google Диск id{self.id} из {type(object).__name__} id{object.id}')
         backup_files = object.backup_preparation(files)
+        if not isinstance(backup_files, list):
+            logging.info(f'Журнал исполнения доступен по ссылке \\progress\\progress_log.log')
+            return        
         uploaded_files = []
         folder_id = self.create_folder(object)        
         logging.info('Запуск процедуры резервного копирования файлов')
